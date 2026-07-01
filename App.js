@@ -4,6 +4,7 @@ import { StatusBar } from 'expo-status-bar';
 import CameraScreen from './screens/CameraScreen';
 import PreviewScreen from './screens/PreviewScreen';
 import ResultScreen from './screens/ResultScreen';
+import HistoryScreen from './screens/HistoryScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -25,6 +26,11 @@ export default function App() {
           name="Result" 
           component={ResultScreen} 
           options={{ title: 'Analysis Result' }} 
+        />
+        <Stack.Screen 
+          name="History" 
+          component={HistoryScreen} 
+          options={{ title: 'Analysis History' }} 
         />
       </Stack.Navigator>
       <StatusBar style="auto" />

@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { View, Text, ActivityIndicator, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
 import { analyzeImage, ANALYSIS_PROMPT, PROMPTS } from '../lib/gemini';
+import { supabase } from '../lib/supabase';
 
 export default function ResultScreen({ route }) {
   const { base64Image, promptKey } = route.params;
@@ -17,6 +18,28 @@ export default function ResultScreen({ route }) {
   useEffect(() => {
     runAnalysis();
   }, [base64Image, promptKey]);
+
+  async function saveToHistory(parsedData) {
+    try {
+      // Check if supabase config is placeholder first
+      const isConfigured = process.env.EXPO_PUBLIC_SUPABASE_URL !== 'your_supabase_url_here';
+      if (!isConfigured) {
+        console.log('Supabase is using placeholder credentials, skipping save.');
+        return;
+      }
+
+      const { error: dbError } = await supabase.from('analysis_history').insert({
+        objects: parsedData.objects ? parsedData.objects.join(', ') : '',
+        context: parsedData.context || '',
+        recommendations: parsedData.recommendations || '',
+      });
+      if (dbError) throw dbError;
+      console.log('Successfully saved analysis to Supabase history.');
+    } catch (err) {
+      // Graceful degradation: do not show error on UI, just log it
+      console.warn('Failed to save history:', err.message || err);
+    }
+  }
 
   async function runAnalysis() {
     setLoading(true);
@@ -38,6 +61,7 @@ export default function ResultScreen({ route }) {
 
       const parsedData = JSON.parse(textPart);
       setAnalysis(parsedData);
+      saveToHistory(parsedData);
     } catch (err) {
       console.error('Analysis error:', err);
       setError('Could not analyze this image. Please try again.');

@@ -42,6 +42,14 @@ export default function CameraScreen({ navigation }) {
   return (
     <View style={styles.container}>
       <CameraView ref={cameraRef} style={styles.camera} facing="back" />
+      
+      <TouchableOpacity 
+        style={[styles.historyButton, { top: insets.top + 16 }]} 
+        onPress={() => navigation.navigate('History')}
+      >
+        <Text style={styles.historyButtonText}>📜 History</Text>
+      </TouchableOpacity>
+
       <TouchableOpacity 
         style={[styles.captureButton, { bottom: insets.bottom + 24 }]} 
         onPress={takePicture}
@@ -55,6 +63,17 @@ export default function CameraScreen({ navigation }) {
 const styles = StyleSheet.create({
   container: { flex: 1 },
   camera: { flex: 1 },
+  historyButton: {
+    position: 'absolute',
+    right: 16,
+    backgroundColor: 'rgba(30, 41, 59, 0.7)',
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.2)',
+  },
+  historyButtonText: { color: '#fff', fontWeight: 'bold', fontSize: 14 },
   captureButton: {
     position: 'absolute',
     alignSelf: 'center',
