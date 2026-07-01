@@ -1,11 +1,13 @@
 import { useState } from 'react';
-import { View, Image, TouchableOpacity, Text, StyleSheet, ActivityIndicator, Alert } from 'react-native';
+import { View, Image, TouchableOpacity, Text, StyleSheet, ActivityIndicator, Alert, useWindowDimensions } from 'react-native';
 import { imageToBase64 } from '../lib/gemini';
 
 export default function PreviewScreen({ route, navigation }) {
   const { photoUri } = route.params;
   const [loading, setLoading] = useState(false);
   const [loadingPersona, setLoadingPersona] = useState(null);
+  const { width } = useWindowDimensions();
+  const isTablet = width >= 768;
 
   async function handleAnalyze(promptKey) {
     setLoading(true);
@@ -24,9 +26,18 @@ export default function PreviewScreen({ route, navigation }) {
 
   return (
     <View style={styles.container}>
-      <Image source={{ uri: photoUri }} style={styles.preview} />
+      <Image 
+        source={{ uri: photoUri }} 
+        style={[
+          styles.preview,
+          isTablet && { maxWidth: 600, alignSelf: 'center', width: '100%' }
+        ]} 
+      />
 
-      <View style={styles.controlPanel}>
+      <View style={[
+        styles.controlPanel,
+        isTablet && { maxWidth: 600, width: '100%', alignSelf: 'center', borderRadius: 20, marginBottom: 20 }
+      ]}>
         <TouchableOpacity 
           style={styles.retakeButton} 
           onPress={() => navigation.goBack()}

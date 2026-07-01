@@ -1,10 +1,12 @@
 import { useState, useRef } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, Platform } from 'react-native';
 import { CameraView, useCameraPermissions } from 'expo-camera';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 export default function CameraScreen({ navigation }) {
   const [permission, requestPermission] = useCameraPermissions();
   const cameraRef = useRef(null);
+  const insets = useSafeAreaInsets();
 
   if (!permission) {
     // Permission status is still loading
@@ -15,7 +17,9 @@ export default function CameraScreen({ navigation }) {
     return (
       <View style={styles.permissionContainer}>
         <Text style={styles.permissionText}>
-          We need your permission to use the camera
+          {Platform.OS === 'ios'
+            ? 'VisionAI needs camera access. Tap below, then choose "Allow" in the dialog.'
+            : 'VisionAI needs camera access. Tap below to grant the permission.'}
         </Text>
         <TouchableOpacity style={styles.permissionButton} onPress={requestPermission}>
           <Text style={styles.permissionButtonText}>Grant Permission</Text>
@@ -38,7 +42,10 @@ export default function CameraScreen({ navigation }) {
   return (
     <View style={styles.container}>
       <CameraView ref={cameraRef} style={styles.camera} facing="back" />
-      <TouchableOpacity style={styles.captureButton} onPress={takePicture}>
+      <TouchableOpacity 
+        style={[styles.captureButton, { bottom: insets.bottom + 24 }]} 
+        onPress={takePicture}
+      >
         <Text style={styles.captureButtonText}>Capture</Text>
       </TouchableOpacity>
     </View>
@@ -50,7 +57,6 @@ const styles = StyleSheet.create({
   camera: { flex: 1 },
   captureButton: {
     position: 'absolute',
-    bottom: 40,
     alignSelf: 'center',
     backgroundColor: '#2E5BBA',
     paddingVertical: 14,
@@ -64,7 +70,7 @@ const styles = StyleSheet.create({
   },
   captureButtonText: { color: '#fff', fontWeight: 'bold', fontSize: 16 },
   permissionContainer: { flex: 1, justifyContent: 'center', alignItems: 'center', padding: 20 },
-  permissionText: { textAlign: 'center', marginBottom: 16, fontSize: 16 },
+  permissionText: { textAlign: 'center', marginBottom: 16, fontSize: 16, color: '#334155', lineHeight: 22 },
   permissionButton: { backgroundColor: '#2E5BBA', padding: 12, borderRadius: 8 },
   permissionButtonText: { color: '#fff', fontWeight: 'bold' },
 });
