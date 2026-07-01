@@ -1,12 +1,33 @@
+import { NavigationContainer } from '@react-navigation/native';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { StatusBar } from 'expo-status-bar';
-import { View } from 'react-native';
 import CameraScreen from './screens/CameraScreen';
+import PreviewScreen from './screens/PreviewScreen';
+import ResultScreen from './screens/ResultScreen';
+
+const Stack = createNativeStackNavigator();
 
 export default function App() {
   return (
-    <View style={{ flex: 1 }}>
-      <CameraScreen />
+    <NavigationContainer>
+      <Stack.Navigator initialRouteName="Camera">
+        <Stack.Screen 
+          name="Camera" 
+          component={CameraScreen} 
+          options={{ headerShown: false }} 
+        />
+        <Stack.Screen 
+          name="Preview" 
+          component={PreviewScreen} 
+          options={{ headerStyle: { backgroundColor: '#000' }, headerTintColor: '#fff', title: 'Preview' }} 
+        />
+        <Stack.Screen 
+          name="Result" 
+          component={ResultScreen} 
+          options={{ title: 'Analysis Result' }} 
+        />
+      </Stack.Navigator>
       <StatusBar style="auto" />
-    </View>
+    </NavigationContainer>
   );
 }

@@ -2,10 +2,9 @@ import { useState, useRef } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { CameraView, useCameraPermissions } from 'expo-camera';
 
-export default function CameraScreen() {
+export default function CameraScreen({ navigation }) {
   const [permission, requestPermission] = useCameraPermissions();
   const cameraRef = useRef(null);
-  const [photo, setPhoto] = useState(null);
 
   if (!permission) {
     // Permission status is still loading
@@ -29,8 +28,8 @@ export default function CameraScreen() {
     if (!cameraRef.current) return;
     try {
       const result = await cameraRef.current.takePictureAsync({ quality: 0.7 });
-      setPhoto(result.uri);
       console.log('Photo captured successfully:', result.uri);
+      navigation.navigate('Preview', { photoUri: result.uri });
     } catch (error) {
       console.error('Failed to take picture:', error);
     }
