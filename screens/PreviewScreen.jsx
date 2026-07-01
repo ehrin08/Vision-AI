@@ -5,17 +5,20 @@ import { imageToBase64 } from '../lib/gemini';
 export default function PreviewScreen({ route, navigation }) {
   const { photoUri } = route.params;
   const [loading, setLoading] = useState(false);
+  const [loadingPersona, setLoadingPersona] = useState(null);
 
-  async function handleAnalyze() {
+  async function handleAnalyze(promptKey) {
     setLoading(true);
+    setLoadingPersona(promptKey);
     try {
       const base64Image = await imageToBase64(photoUri);
-      navigation.navigate('Result', { base64Image });
+      navigation.navigate('Result', { base64Image, promptKey });
     } catch (error) {
       console.error('Failed to convert photo:', error);
       Alert.alert('Error', 'Failed to process image. Please try again.');
     } finally {
       setLoading(false);
+      setLoadingPersona(null);
     }
   }
 
@@ -23,37 +26,78 @@ export default function PreviewScreen({ route, navigation }) {
     <View style={styles.container}>
       <Image source={{ uri: photoUri }} style={styles.preview} />
 
-      <View style={styles.actionRow}>
+      <View style={styles.controlPanel}>
         <TouchableOpacity 
           style={styles.retakeButton} 
           onPress={() => navigation.goBack()}
           disabled={loading}
         >
-          <Text style={styles.buttonText}>Retake</Text>
+          <Text style={styles.retakeButtonText}>← Retake Photo</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity
-          style={[styles.analyzeButton, loading && styles.disabledButton]}
-          onPress={handleAnalyze}
-          disabled={loading}
-        >
-          {loading ? (
-            <ActivityIndicator color="#fff" size="small" />
-          ) : (
-            <Text style={styles.buttonText}>Analyze</Text>
-          )}
-        </TouchableOpacity>
+        <Text style={styles.pickerTitle}>Analyze Photo With:</Text>
+
+        <View style={styles.personaContainer}>
+          <TouchableOpacity
+            style={[styles.personaButton, { backgroundColor: '#4F46E5' }, loading && styles.disabledButton]}
+            onPress={() => handleAnalyze('academic')}
+            disabled={loading}
+          >
+            {loading && loadingPersona === 'academic' ? (
+              <ActivityIndicator color="#fff" size="small" />
+            ) : (
+              <Text style={styles.buttonText}>🎓 Academic Professor</Text>
+            )}
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={[styles.personaButton, { backgroundColor: '#DC2626' }, loading && styles.disabledButton]}
+            onPress={() => handleAnalyze('safety')}
+            disabled={loading}
+          >
+            {loading && loadingPersona === 'safety' ? (
+              <ActivityIndicator color="#fff" size="small" />
+            ) : (
+              <Text style={styles.buttonText}>🚨 Safety Inspector</Text>
+            )}
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={[styles.personaButton, { backgroundColor: '#059669' }, loading && styles.disabledButton]}
+            onPress={() => handleAnalyze('inventory')}
+            disabled={loading}
+          >
+            {loading && loadingPersona === 'inventory' ? (
+              <ActivityIndicator color="#fff" size="small" />
+            ) : (
+              <Text style={styles.buttonText}>📋 Inventory Clerk</Text>
+            )}
+          </TouchableOpacity>
+        </View>
       </View>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#000' },
+  container: { flex: 1, backgroundColor: '#0B0F19' },
   preview: { flex: 1, resizeMode: 'contain' },
-  actionRow: { flexDirection: 'row', justifyContent: 'space-around', padding: 20 },
-  retakeButton: { backgroundColor: '#5A6472', paddingVertical: 14, paddingHorizontal: 28, borderRadius: 8 },
-  analyzeButton: { backgroundColor: '#5B3FA3', paddingVertical: 14, paddingHorizontal: 28, borderRadius: 8 },
-  disabledButton: { backgroundColor: '#8A7BBF' },
-  buttonText: { color: '#fff', fontWeight: 'bold', fontSize: 16 },
+  controlPanel: { backgroundColor: '#1E293B', padding: 20, borderTopLeftRadius: 20, borderTopRightRadius: 20 },
+  retakeButton: { alignSelf: 'flex-start', marginBottom: 15 },
+  retakeButtonText: { color: '#94A3B8', fontSize: 15, fontWeight: '600' },
+  pickerTitle: { color: '#E2E8F0', fontSize: 16, fontWeight: '700', marginBottom: 12 },
+  personaContainer: { gap: 10 },
+  personaButton: { 
+    paddingVertical: 14, 
+    borderRadius: 10, 
+    alignItems: 'center', 
+    justifyContent: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 3,
+    elevation: 3,
+  },
+  disabledButton: { opacity: 0.5 },
+  buttonText: { color: '#fff', fontWeight: 'bold', fontSize: 15 },
 });

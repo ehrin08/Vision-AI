@@ -1,22 +1,29 @@
 import { useState, useEffect } from 'react';
 import { View, Text, ActivityIndicator, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
-import { analyzeImage, ANALYSIS_PROMPT } from '../lib/gemini';
+import { analyzeImage, ANALYSIS_PROMPT, PROMPTS } from '../lib/gemini';
 
 export default function ResultScreen({ route }) {
-  const { base64Image } = route.params;
+  const { base64Image, promptKey } = route.params;
   const [analysis, setAnalysis] = useState(null);
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(true);
 
+  const personaTitles = {
+    academic: '🎓 Academic Analysis',
+    safety: '🚨 Safety Analysis',
+    inventory: '📋 Inventory Analysis',
+  };
+
   useEffect(() => {
     runAnalysis();
-  }, [base64Image]);
+  }, [base64Image, promptKey]);
 
   async function runAnalysis() {
     setLoading(true);
     setError(null);
     try {
-      const result = await analyzeImage(base64Image, ANALYSIS_PROMPT);
+      const selectedPrompt = PROMPTS[promptKey] || ANALYSIS_PROMPT;
+      const result = await analyzeImage(base64Image, selectedPrompt);
       let textPart = result?.candidates?.[0]?.content?.parts?.[0]?.text;
       if (!textPart) throw new Error('Empty response from Gemini');
       
@@ -61,6 +68,8 @@ export default function ResultScreen({ route }) {
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.contentContainer}>
+      <Text style={styles.headerTitle}>{personaTitles[promptKey] || 'AI Vision Analysis'}</Text>
+
       <Text style={styles.sectionTitle}>Objects</Text>
       {analysis?.objects && analysis.objects.length > 0 ? (
         analysis.objects.map((obj, i) => (
@@ -95,6 +104,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
   },
   retryButtonText: { color: '#fff', fontWeight: 'bold', fontSize: 16 },
+  headerTitle: { fontSize: 22, fontWeight: '800', color: '#0F172A', marginBottom: 15, textAlign: 'center' },
   sectionTitle: { fontSize: 18, fontWeight: 'bold', marginTop: 24, color: '#1F2A44', borderBottomWidth: 1, borderBottomColor: '#E2E8F0', paddingBottom: 6 },
   listItem: { fontSize: 15, marginTop: 6, color: '#334155', paddingLeft: 8 },
   bodyText: { fontSize: 15, marginTop: 8, color: '#334155', lineHeight: 22 },
